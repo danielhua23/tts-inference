@@ -1,0 +1,13 @@
+# Versions as verified in the danie_torch_2504 container. torch and triton are
+# the container's own (torch 2.7.0a0+79aa17489c.nv25.04, triton 3.2.0) and must
+# not be reinstalled from PyPI: a different torch build means different kernels
+# and different numerics, and every measurement in PERFORMANCE.md assumes these.
+transformers==5.3.0
+safetensors==0.5.3
+numpy==1.26.4
+
+# Optional. aiohttp for qtts.entrypoints.serve, soundfile for writing WAV files
+# (utils.write_wav falls back to the stdlib wave module), pytest for the suite.
+aiohttp==3.11.14
+soundfile==0.13.1
+pytest==8.1.1

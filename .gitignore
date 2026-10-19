@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Outputs
+*.wav
+*.jsonl
+sweep.jsonl
+
+# Reference dumps for the parity suite (scripts/dump_reference.py)
+*.pt

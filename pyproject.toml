@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qtts"
+version = "0.1.0"
+description = "A minimal Qwen3-TTS inference runtime for experimenting with quantization and serving"
+requires-python = ">=3.10"
+
+# torch and triton are deliberately absent. This runs inside the NGC PyTorch
+# container (danie_torch_2504: torch 2.7.0a0+nv25.04, triton 3.2.0), and a pip
+# resolver that decides to "satisfy" a torch requirement replaces the container's
+# build with a wheel that has different kernels and different numerics -- which
+# is the one thing a measurement sandbox cannot afford. Install into the
+# container and leave its torch alone.
+dependencies = [
+    "transformers>=4.57",
+    "safetensors>=0.4",
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+# The engine needs none of these. Audio files need soundfile (there is a stdlib
+# wave fallback in utils.write_wav), the HTTP server needs aiohttp, the parity
+# suite needs pytest and a checkpoint.
+serve = ["aiohttp>=3.9"]
+audio = ["soundfile>=0.12"]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+qtts-generate = "qtts.entrypoints.generate:main"
+qtts-serve = "qtts.entrypoints.serve:main"
+qtts-benchmark = "qtts.entrypoints.benchmark:main"
+
+[tool.setuptools.packages.find]
+include = ["qtts*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Most of the suite skips itself without a checkpoint; QTTS_MODEL and
+# QTTS_REFERENCE are what turn it on. See tests/test_parity.py.
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+# .ref/ is vendored vllm-omni source, kept verbatim for comparison.
+extend-exclude = [".ref"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = [
+    # The Triton kernels take long positional argument lists with the pointer,
+    # stride and constexpr groups on their own lines; reflowing them to one
+    # argument per line makes them unreadable.
+    "E501",
+]
